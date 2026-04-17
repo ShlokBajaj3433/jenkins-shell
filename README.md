@@ -90,15 +90,14 @@ docker volume create jenkins_home
 docker run -d --name jenkins `
   -p 8080:8080 -p 50000:50000 `
   -v jenkins_home:/var/jenkins_home `
-  -v //var/run/docker.sock:/var/run/docker.sock `
   -v c:/codes/Jenkins:/workspace `
   jenkins/jenkins:lts-jdk17
 ```
 
-### 2. Install Docker CLI inside Jenkins container
+### 2. Install shell tools inside Jenkins container
 
 ```powershell
-docker exec -u 0 jenkins sh -c "apt-get update && apt-get install -y docker.io"
+docker exec -u 0 jenkins sh -c "apt-get update && apt-get install -y bash coreutils"
 ```
 
 ### 3. Open Jenkins and unlock
@@ -116,8 +115,8 @@ Install suggested plugins and complete the first admin user setup.
 
 The Jenkinsfile has two stages:
 
-1. Docker Build: builds image my-app
-2. Run Container: runs image my-app
+1. Checkout
+2. Run Script
 
 ### Create Jenkins job for this project
 
@@ -131,20 +130,18 @@ The Jenkinsfile has two stages:
 
 ### Notes
 
-- This setup uses Docker-outside-of-Docker via the mounted Docker socket.
-- If multiple jobs run in parallel, image name collisions can happen because the current image tag is my-app.
+- This setup does not require Docker socket access for Jenkins builds.
+- The pipeline directly runs the shell script inside Jenkins.
 
 ## Troubleshooting
 
 - Permission denied on script:
   - Run chmod +x script.sh
 - docker: command not found:
-  - Ensure Docker socket is mounted and Docker CLI is installed in the Jenkins container
-- Jenkins cannot access Docker:
-  - Add Jenkins user to Docker group or configure Docker access properly
+  - This pipeline no longer uses Docker in Jenkins
 
 ## Keep It Simple and Standard
 
 - Script logic is minimal and clear
-- Dockerfile uses a standard Ubuntu base and executes script.sh
-- Jenkins pipeline uses straightforward build and run stages
+- Dockerfile is still available for local container testing
+- Jenkins pipeline uses straightforward checkout and script execution

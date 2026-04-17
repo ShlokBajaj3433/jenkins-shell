@@ -1,17 +1,22 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+    }
+
     stages {
 
-        stage('Docker Build') {
+        stage('Checkout') {
             steps {
-                sh 'docker build --no-cache -t my-app .'
+                checkout scm
             }
         }
 
-        stage('Run Container') {
+        stage('Run Script') {
             steps {
-                sh 'docker run my-app'
+                sh 'chmod +x script.sh'
+                sh './script.sh'
             }
         }
 
